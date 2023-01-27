@@ -6,5 +6,3 @@ services:
     container_name: catalog-admin-python
     volumes:
       - .:/home/python/app
-      
-      
