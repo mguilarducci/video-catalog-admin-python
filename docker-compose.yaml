@@ -4,5 +4,6 @@ services:
   app:
     build: .
     container_name: catalog-admin-python
+    command: ./.docker/entrypoint.sh
     volumes:
       - .:/home/python/app

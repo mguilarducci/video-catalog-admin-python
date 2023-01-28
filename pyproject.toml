@@ -1,0 +1,19 @@
+[tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "autopep8>=2.0.1",
+    "pylint>=2.15.10",
+    "pytest>=7.2.1",
+]
+
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Matheus Guilarducci", email = "mguilarducci@gmail.com"},
+]
+dependencies = [
+]
+requires-python = ">=3.10.9"
+license = {text = "MIT"}
