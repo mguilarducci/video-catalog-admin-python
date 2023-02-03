@@ -1,7 +1,9 @@
 from dataclasses import fields
 from unittest import TestCase
+from unittest.mock import MagicMock, PropertyMock, patch
+from rest_framework.serializers import Serializer
 
-from __shared.domain.validators import FieldValidatorInterface
+from __shared.domain.validators import DRFValidator, FieldValidatorInterface
 
 
 class FieldValidatorInterfaceUnitTest(TestCase):
@@ -26,3 +28,30 @@ class FieldValidatorInterfaceUnitTest(TestCase):
         validated_data_field = class_fields[1]
         self.assertEqual('validated_data', validated_data_field.name)
         self.assertIsNone(validated_data_field.default)
+
+
+# pylint: disable=unused-argument
+class DRFValidatorUnitTest(TestCase):
+    @patch.object(Serializer, 'is_valid', return_value=True)
+    @patch.object(Serializer, 'validated_data', return_value={'field': 'value'},
+                  new_callable=PropertyMock)
+    def test_should_set_validated_data_when_is_valid_is_true(self,
+                                                             mock_validated_data: PropertyMock,
+                                                             mock_is_valid: MagicMock):
+
+        validator = DRFValidator()
+        validator.validate(Serializer())
+
+        self.assertEqual({'field': 'value'}, validator.validated_data)
+
+    @patch.object(Serializer, 'is_valid', return_value=False)
+    @patch.object(Serializer, 'errors', return_value={'field': ['error']},
+                  new_callable=PropertyMock)
+    def test_should_set_errors_when_is_valid_is_false(self,
+                                                      mock_validated_data: PropertyMock,
+                                                      mock_is_valid: MagicMock):
+
+        validator = DRFValidator()
+        validator.validate(Serializer())
+
+        self.assertEqual({'field': ['error']}, validator.errors)

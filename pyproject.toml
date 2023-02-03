@@ -14,6 +14,7 @@ authors = [
     {name = "Matheus Guilarducci", email = "mguilarducci@gmail.com"},
 ]
 dependencies = [
+    "djangorestframework>=3.14.0",
 ]
 requires-python = ">=3.10.9"
 license = {text = "MIT"}
