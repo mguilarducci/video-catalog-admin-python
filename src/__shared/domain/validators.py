@@ -2,6 +2,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, Generic, List, TypeVar
 from rest_framework.serializers import Serializer
+from django.conf import settings
+
+
+if not settings.configured:
+    settings.configure(USE_I18N=False)
 
 
 ErrorsField = Dict[str, List[str]]
