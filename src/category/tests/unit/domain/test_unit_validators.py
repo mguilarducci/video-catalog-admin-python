@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import TestCase
 from __shared.domain.validators import FieldValidatorInterface
 
@@ -21,6 +22,9 @@ class CategoryValidatorUnitTest(TestCase):
         'not_null': 'This field may not be null.',
         'not_blank': 'This field may not be blank.',
         'max_length': 'Ensure this field has no more than 255 characters.',
+        'invalid_boolean': 'Must be a valid boolean.',
+        'invalid_datetime': 'Datetime has wrong format. Use one of these formats instead: ' +
+        'YYYY-MM-DDThh:mm[:ss[.uuuuuu]][+HH:MM|-HH:MM|Z].'
     }
 
     validator: CategoryValidator
@@ -94,14 +98,14 @@ class CategoryValidatorUnitTest(TestCase):
         data = {'name': 'name', 'is_active': None}
         is_valid = self.validator.validate(data)
         self.assertFalse(is_valid)
-        self.assertEqual('This field may not be null.',
+        self.assertEqual(self.error_messages.get('not_null'),
                          self.validator.errors.get('is_active').pop(),
                          'is_active should not be none')
 
         data = {'name': 'name', 'is_active': ''}
         is_valid = self.validator.validate(data)
         self.assertFalse(is_valid)
-        self.assertEqual('Must be a valid boolean.',
+        self.assertEqual(self.error_messages.get('invalid_boolean'),
                          self.validator.errors.get('is_active').pop(),
                          'is_active should not be empty')
 
@@ -125,19 +129,31 @@ class CategoryValidatorUnitTest(TestCase):
         self.assertDictEqual(data, self.validator.validated_data,
                              'is_active can be empty')
 
-    def test_should_validate_created_at_with_valid_values(self):
+    def test_should_not_validate_created_at_with_invalid_values(self):
         data = {'name': 'name', 'created_at': None}
         is_valid = self.validator.validate(data)
         self.assertFalse(is_valid)
-        self.assertEqual('This field may not be null.',
+        self.assertEqual(self.error_messages.get('not_null'),
                          self.validator.errors.get('created_at').pop(),
                          'created_at should not be none')
 
         data = {'name': 'name', 'created_at': ''}
         is_valid = self.validator.validate(data)
         self.assertFalse(is_valid)
-        self.assertEqual(
-            'Datetime has wrong format. Use one of these formats instead: ' +
-            'YYYY-MM-DDThh:mm[:ss[.uuuuuu]][+HH:MM|-HH:MM|Z].',
-            self.validator.errors.get('created_at').pop(),
-            'created_at should not be blank')
+        self.assertEqual(self.error_messages.get('invalid_datetime'),
+                         self.validator.errors.get('created_at').pop(),
+                         'created_at should not be blank')
+
+    def test_should_validate_created_at_with_valid_values(self):
+        # sourcery skip: extract-duplicate-method
+        data = {'name': 'name'}
+        is_valid = self.validator.validate(data)
+        self.assertTrue(is_valid)
+        self.assertDictEqual(data, self.validator.validated_data,
+                             'created_at can be empty')
+
+        data = {'name': 'name', 'created_at': datetime.now()}
+        is_valid = self.validator.validate(data)
+        self.assertTrue(is_valid)
+        self.assertDictEqual(data, self.validator.validated_data,
+                             'created_at can be a datetime')
