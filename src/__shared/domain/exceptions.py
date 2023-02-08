@@ -1,2 +1,2 @@
-class InvalidUniqueEntityIdValueError(Exception):
+class InvalidUniqueEntityIdValueException(Exception):
     pass

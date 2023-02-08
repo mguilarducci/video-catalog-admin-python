@@ -2,7 +2,7 @@ from abc import ABC
 from unittest import TestCase
 from dataclasses import FrozenInstanceError, dataclass, is_dataclass
 import uuid
-from __shared.domain.exceptions import InvalidUniqueEntityIdValueError
+from __shared.domain.exceptions import InvalidUniqueEntityIdValueException
 from __shared.domain.value_objects import UniqueEntityId, ValueObject
 
 
@@ -55,7 +55,7 @@ class UniqueEntityIdUnitTest(TestCase):
         self.assertTrue(issubclass(UniqueEntityId, ValueObject))
 
     def test_should_throw_an_exception_when_id_arg_is_invalid(self):
-        with self.assertRaises(InvalidUniqueEntityIdValueError):
+        with self.assertRaises(InvalidUniqueEntityIdValueException):
             UniqueEntityId('invalid id')
 
     def test_should_accept_a_valid_id_passed_in_constructor(self):

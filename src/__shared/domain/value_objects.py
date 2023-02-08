@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, fields
 import json
 import uuid
 
-from __shared.domain.exceptions import InvalidUniqueEntityIdValueError
+from __shared.domain.exceptions import InvalidUniqueEntityIdValueException
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,4 +29,4 @@ class UniqueEntityId(ValueObject):
         try:
             uuid.UUID(self._id)
         except ValueError as error:
-            raise InvalidUniqueEntityIdValueError() from error
+            raise InvalidUniqueEntityIdValueException() from error
