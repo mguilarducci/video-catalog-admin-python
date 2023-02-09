@@ -62,19 +62,16 @@ class CategoryUnitTest(TestCase):
         category = Category(name='name')
         category.update('new name', 'new description')
 
+        self.assertEqual(2, mock_validate.call_count)
         self.assertEqual('new name', category.name)
         self.assertEqual('new description', category.description)
 
-    @patch.object(Category, 'validate', return_value=True)
-    # pylint: disable=unused-argument
-    def test_should_activate(self, mock_validate):
+    def test_should_activate(self):
         category = Category(name='name', is_active=False)
         category.activate()
         self.assertTrue(category.is_active)
 
-    @patch.object(Category, 'validate', return_value=True)
-    # pylint: disable=unused-argument
-    def test_should_deactivate(self, mock_validate):
+    def test_should_deactivate(self):
         category = Category(name='name', is_active=True)
         category.deactivate()
         self.assertFalse(category.is_active)
