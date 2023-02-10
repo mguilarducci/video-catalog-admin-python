@@ -56,4 +56,4 @@ class InMemoryRepository(RepositoryInterface[GenericEntity], ABC):
 
     def _raise_if_not_found(self, entity_id: str) -> None:
         if entity_id not in self.items:
-            raise NotFoundException(f'Entity not found. ID: `{entity_id}`')
+            raise NotFoundException(f'Entity not found. data=[id: `{entity_id}`]')
