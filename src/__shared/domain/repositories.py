@@ -6,6 +6,8 @@ from __shared.domain.value_objects import UniqueEntityId
 
 
 GenericEntity = TypeVar('GenericEntity', bound=Entity)
+GenericSearchableInput = TypeVar('GenericSearchableInput')
+GenericSearchableOutput = TypeVar('GenericSearchableOutput')
 
 
 class RepositoryInterface(Generic[GenericEntity], ABC):
@@ -27,4 +29,13 @@ class RepositoryInterface(Generic[GenericEntity], ABC):
 
     @abstractmethod
     def delete(self, entity_id: str | UniqueEntityId) -> None:
+        raise NotImplementedError()
+
+
+class SearchableRepositoryInterface(Generic[GenericEntity,
+                                            GenericSearchableInput,
+                                            GenericSearchableOutput],
+                                    RepositoryInterface[GenericEntity], ABC):
+    @abstractmethod
+    def search(self, params: GenericSearchableInput) -> GenericSearchableOutput:
         raise NotImplementedError()
