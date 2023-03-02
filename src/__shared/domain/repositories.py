@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Generic, List, Optional, TypeVar
+import math
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from __shared.domain.entities import Entity
 from __shared.domain.value_objects import UniqueEntityId
@@ -116,3 +117,37 @@ class SearchParams(Generic[SearchFilter]):
             return int(value)
         except (ValueError, TypeError):
             return default
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class SearchResult(Generic[GenericEntity]):
+    count: int
+    items_per_page: int
+    current_page: int
+    current_page_count: int = field(init=False)
+    last_page: int = field(init=False)
+    data: List[GenericEntity]
+
+    def __post_init__(self):
+        self._normalize_data()
+        self._init_current_page_count()
+        self._init_last_page()
+
+    def to_dict(self) -> Dict:
+        return {'count': self.count,
+                'items_per_page': self.items_per_page,
+                'current_page': self.current_page,
+                'current_page_count': self.current_page_count,
+                'last_page': self.last_page,
+                'data': self.data}
+
+    def _init_current_page_count(self):
+        object.__setattr__(self, 'current_page_count', len(self.data))
+
+    def _init_last_page(self):
+        last_page = math.ceil(self.count / self.items_per_page)
+        object.__setattr__(self, 'last_page', last_page)
+
+    def _normalize_data(self):
+        if self.data is None:
+            object.__setattr__(self, 'data', [])

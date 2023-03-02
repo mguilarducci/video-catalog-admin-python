@@ -1,7 +1,15 @@
-from typing import Optional
+from dataclasses import dataclass
+from typing import List, Optional
 from unittest import TestCase
-from __shared.domain.repositories import RepositoryInterface, SearchFilter, \
-    SearchParams, SearchableRepositoryInterface
+from __shared.domain.entities import Entity
+from __shared.domain.repositories import GenericEntity, RepositoryInterface, SearchFilter, \
+    SearchParams, SearchResult, SearchableRepositoryInterface
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class EntityStub(Entity):
+    name: str
+    age: int
 
 
 class RepositoryInterfaceUnitTest(TestCase):
@@ -211,3 +219,62 @@ class SearchParamsUnitTest(TestCase):
 
             self.assertEqual(
                 expected, search_params.filter, expected_message)
+
+
+class SearchResultUnitTest(TestCase):
+    def test_should_have_correct_props(self):
+        expected = {
+            'count': int,
+            'current_page': int,
+            'current_page_count': int,
+            'items_per_page': int,
+            'last_page': int,
+            'data': List[GenericEntity]
+        }
+
+        self.assertDictEqual(expected, SearchResult.__annotations__)
+
+    def test_constructor(self):
+        stub = EntityStub(name='name value', age=20)
+        search_result = SearchResult(
+            data=[stub, stub], count=6, current_page=1, items_per_page=2)
+
+        self.assertListEqual([stub, stub], search_result.data)
+        self.assertEqual(1, search_result.current_page)
+        self.assertEqual(2, search_result.current_page_count)
+        self.assertEqual(2, search_result.items_per_page)
+        self.assertEqual(6, search_result.count)
+        self.assertEqual(3, search_result.last_page)
+
+    def test_when_data_is_none(self):
+        search_result = SearchResult(
+            data=None, count=1, current_page=1, items_per_page=1)
+
+        self.assertListEqual([], search_result.data)
+        self.assertEqual(0, search_result.current_page_count)
+
+    def test_last_page_when_items_per_page_count_is_greater_than_total_count(self):
+        search_result = SearchResult(
+            data=[], count=5, current_page=1, items_per_page=10)
+
+        self.assertEqual(1, search_result.last_page)
+
+    def test_last_page_when_items_per_page_count_is_less_than_total_count(self):
+        search_result = SearchResult(
+            data=[], count=21, current_page=1, items_per_page=10)
+
+        self.assertEqual(3, search_result.last_page)
+
+    def test_to_dict(self):
+        stub = EntityStub(name='name value', age=20)
+        search_result = SearchResult(
+            data=[stub, stub], count=2, current_page=1, items_per_page=2)
+
+        expected = {'count': 2,
+                    'items_per_page': 2,
+                    'current_page': 1,
+                    'current_page_count': 2,
+                    'last_page': 1,
+                    'data': [stub, stub]}
+
+        self.assertDictEqual(expected, search_result.to_dict())
