@@ -45,7 +45,7 @@ class SearchableRepositoryInterface(Generic[GenericEntity,
 SearchFilter = TypeVar('SearchFilter', str, Any)
 
 
-@dataclass(slots=True, kw_only=True)
+@dataclass(slots=True, kw_only=True, frozen=True)
 class SearchParams(Generic[SearchFilter]):
     DEFAULT_PAGE = 1
     DEFAULT_ITEMS_PER_PAGE = 10
@@ -76,36 +76,39 @@ class SearchParams(Generic[SearchFilter]):
         if page <= 0:
             page = SearchParams.DEFAULT_PAGE
 
-        self.page = page
+        object.__setattr__(self, 'page', page)
 
     def _normalize_items_per_page(self):
         items_per_page = SearchParams._convert_to_int(self.items_per_page)
         if items_per_page < 1:
             items_per_page = SearchParams.DEFAULT_ITEMS_PER_PAGE
 
-        self.items_per_page = items_per_page
+        object.__setattr__(self, 'items_per_page', items_per_page)
 
     def _normalize_order_by_field(self):
         if self.order_by_field is not None:
-            self.order_by_field = None if self.order_by_field == '' \
+            order_by_field = None if self.order_by_field == '' \
                 else str(self.order_by_field)
+
+            object.__setattr__(self, 'order_by_field', order_by_field)
 
     def _normalize_order_by_direction(self):
         if not self.order_by_field:
-            self.order_by_direction = None
+            object.__setattr__(self, 'order_by_direction', None)
             return
 
         direction = str(self.order_by_direction).lower()
         if direction not in ['asc', 'desc']:
-            self.order_by_direction = 'asc'
-            return
+            direction = 'asc'
 
-        self.order_by_direction = direction
+        object.__setattr__(self, 'order_by_direction', direction)
 
     def _normalize_filter(self):
         if self.filter is not None:
-            self.filter = None if self.filter == '' \
+            filter_param = None if self.filter == '' \
                 else str(self.filter)
+
+            object.__setattr__(self, 'filter', filter_param)
 
     @staticmethod
     def _convert_to_int(value: Any, default=0) -> int:  # pylint: disable=no-self-use
