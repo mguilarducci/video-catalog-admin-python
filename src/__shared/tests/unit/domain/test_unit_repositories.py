@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 from unittest import TestCase
 from __shared.domain.entities import Entity
-from __shared.domain.repositories import GenericEntity, RepositoryInterface, SearchFilter, \
-    SearchParams, SearchResult, SearchableRepositoryInterface
+from __shared.domain.repositories import GenericEntity, RepositoryInterface, \
+    SearchFilter, SearchParams, SearchResult, SearchableRepositoryInterface
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
