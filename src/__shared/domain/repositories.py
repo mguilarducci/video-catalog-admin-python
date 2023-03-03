@@ -40,7 +40,7 @@ class SearchableRepositoryInterface(Generic[GenericEntity,
                                             GenericSearchableOutput],
                                     RepositoryInterface[GenericEntity], ABC):
     @abstractmethod
-    def search(self, params: GenericSearchableInput) -> GenericSearchableOutput:
+    def search(self, search_params: GenericSearchableInput) -> GenericSearchableOutput:
         raise NotImplementedError()
 
 
