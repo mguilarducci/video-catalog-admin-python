@@ -10,6 +10,7 @@ from __shared.domain.value_objects import UniqueEntityId
 GenericEntity = TypeVar('GenericEntity', bound=Entity)
 GenericSearchableInput = TypeVar('GenericSearchableInput')
 GenericSearchableOutput = TypeVar('GenericSearchableOutput')
+SearchFilter = TypeVar('SearchFilter', str, Any)
 
 
 class RepositoryInterface(Generic[GenericEntity], ABC):
@@ -41,9 +42,6 @@ class SearchableRepositoryInterface(Generic[GenericEntity,
     @abstractmethod
     def search(self, params: GenericSearchableInput) -> GenericSearchableOutput:
         raise NotImplementedError()
-
-
-SearchFilter = TypeVar('SearchFilter', str, Any)
 
 
 @dataclass(slots=True, kw_only=True, frozen=True)
