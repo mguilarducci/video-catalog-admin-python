@@ -73,4 +73,6 @@ class InMemorySearchableRepository(Generic[GenericEntity, SearchFilter],
         return sorted(data, key=lambda item: getattr(item, order_by_field), reverse=reverse)
 
     def _paginate(self, data: List[GenericEntity], page: int, per_page: int) -> List[GenericEntity]:
-        pass
+        start = (page - 1) * per_page
+        end = start + per_page
+        return data[slice(start, end)]

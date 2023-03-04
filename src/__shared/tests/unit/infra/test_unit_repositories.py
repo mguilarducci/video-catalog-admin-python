@@ -193,3 +193,32 @@ class InMemorySearchableRepositoryUnitTest(TestCase):
         ordered_sortable_int.reverse()
         self.assertEqual(ordered_sortable_int, result,
                          'should sort with desc direction when has direction is `desc`')
+
+    def test__paginate_behavior(self):  # sourcery skip: extract-duplicate-method
+        # pylint: disable=protected-access
+        data = [EntityStub(name='A', age=1, sortable_int=1),
+                EntityStub(name='B', age=1, sortable_int=1),
+                EntityStub(name='C', age=1, sortable_int=1),
+                EntityStub(name='D', age=1, sortable_int=1),
+                EntityStub(name='E', age=1, sortable_int=1)]
+
+        result = self.repository._paginate(data, 1, 2)
+        self.assertEqual(data[:2], result)
+
+        result = self.repository._paginate(data, 2, 2)
+        self.assertEqual(data[2:4], result)
+
+        result = self.repository._paginate(data, 3, 2)
+        self.assertEqual(data[4:], result)
+
+        result = self.repository._paginate(data, 4, 2)
+        self.assertEqual([], result)
+
+        result = self.repository._paginate(data, 1, 3)
+        self.assertEqual(data[:3], result)
+
+        result = self.repository._paginate(data, 2, 3)
+        self.assertEqual(data[3:], result)
+
+        result = self.repository._paginate(data, 3, 3)
+        self.assertEqual([], result)
