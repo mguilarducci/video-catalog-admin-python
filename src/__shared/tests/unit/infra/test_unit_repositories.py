@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from __shared.domain.entities import Entity
 from __shared.domain.exceptions import NotFoundException
+from __shared.domain.repositories import SearchParams, SearchResult
 from __shared.infra.repositories import InMemoryRepository, InMemorySearchableRepository
 
 
@@ -141,9 +142,9 @@ class InMemorySearchableRepositoryUnitTest(TestCase):
 
     def test__order_by_behavior(self):
         # pylint: disable=protected-access
-        data = [EntityStub(name='C', age=3, sortable_int=1),
-                EntityStub(name='A', age=1, sortable_int=3),
-                EntityStub(name='B', age=2, sortable_int=2)]
+        data = [EntityStub(name='Test 3', age=3, sortable_int=1), # NOSONAR
+                EntityStub(name='TeSt 1', age=1, sortable_int=3), # NOSONAR
+                EntityStub(name='test 2', age=2, sortable_int=2)] # NOSONAR
 
         ordered_name = [data[1], data[2], data[0]]
         ordered_sortable_int = [data[0], data[2], data[1]]
@@ -194,7 +195,8 @@ class InMemorySearchableRepositoryUnitTest(TestCase):
         self.assertEqual(ordered_sortable_int, result,
                          'should sort with desc direction when has direction is `desc`')
 
-    def test__paginate_behavior(self):  # sourcery skip: extract-duplicate-method
+    def test__paginate_behavior(self):
+        # sourcery skip: extract-duplicate-method
         # pylint: disable=protected-access
         data = [EntityStub(name='A', age=1, sortable_int=1),
                 EntityStub(name='B', age=1, sortable_int=1),
@@ -222,3 +224,96 @@ class InMemorySearchableRepositoryUnitTest(TestCase):
 
         result = self.repository._paginate(data, 3, 3)
         self.assertEqual([], result)
+
+    def test_search_with_empty_search_params(self):
+        self.repository.data = [EntityStub(
+            name='a', age=1, sortable_int=1)] * 21
+
+        expected = SearchResult(count=21,
+                                items_per_page=10,
+                                current_page=1,
+                                data=self.repository.data[:10])
+
+        result = self.repository.search(SearchParams())
+        self.assertEqual(expected, result)
+
+    def test_search_with_filter_and_order_by(self):
+        data = [EntityStub(name='Test 3', age=1, sortable_int=1),
+                EntityStub(name='TeSt 1', age=1, sortable_int=1),
+                EntityStub(name='C', age=1, sortable_int=1),
+                EntityStub(name='test 2', age=1, sortable_int=1),
+                EntityStub(name='E', age=1, sortable_int=1)]
+
+        self.repository.data = data
+
+        expected = SearchResult(count=3,
+                                items_per_page=10,
+                                current_page=1,
+                                data=[data[1], data[3], data[0]])
+
+        result = self.repository.search(SearchParams(page=1,
+                                                     items_per_page=10,
+                                                     filter='test',
+                                                     order_by_field='name'))
+        self.assertEqual(expected, result)
+
+    def test_search_with_filter_and_paginate(self):
+        data = [EntityStub(name='Test 3', age=1, sortable_int=1),
+                EntityStub(name='TeSt 1', age=1, sortable_int=1),
+                EntityStub(name='C', age=1, sortable_int=1),
+                EntityStub(name='test 2', age=1, sortable_int=1),
+                EntityStub(name='E', age=1, sortable_int=1)]
+
+        self.repository.data = data
+
+        expected = SearchResult(count=3,
+                                items_per_page=2,
+                                current_page=1,
+                                data=data[:2])
+
+        result = self.repository.search(SearchParams(page=1,
+                                                     items_per_page=2,
+                                                     filter='test'))
+        self.assertEqual(expected, result)
+
+    def test_search_with_order_by_and_paginate(self):
+        # sourcery skip: class-extract-method
+        data = [EntityStub(name='Test 3', age=1, sortable_int=1),
+                EntityStub(name='TeSt 1', age=1, sortable_int=1),
+                EntityStub(name='C', age=1, sortable_int=1),
+                EntityStub(name='test 2', age=1, sortable_int=1),
+                EntityStub(name='E', age=1, sortable_int=1)]
+
+        self.repository.data = data
+
+        expected = SearchResult(count=5,
+                                items_per_page=2,
+                                current_page=1,
+                                data=[data[2], data[4]])
+
+        result = self.repository.search(SearchParams(page=1,
+                                                     items_per_page=2,
+                                                     order_by_field='name'))
+
+        self.assertEqual(expected, result)
+
+    def test_search_with_filter_and_order_by_and_paginate(self):
+        data = [EntityStub(name='Test 3', age=1, sortable_int=1),
+                EntityStub(name='TeSt 1', age=1, sortable_int=1),
+                EntityStub(name='C', age=1, sortable_int=1),
+                EntityStub(name='test 2', age=1, sortable_int=1),
+                EntityStub(name='E', age=1, sortable_int=1)]
+
+        self.repository.data = data
+
+        expected = SearchResult(count=3,
+                                items_per_page=2,
+                                current_page=1,
+                                data=[data[1], data[3]])
+
+        result = self.repository.search(SearchParams(page=1,
+                                                     items_per_page=2,
+                                                     filter='test',
+                                                     order_by_field='name'))
+
+        self.assertEqual(expected, result)
