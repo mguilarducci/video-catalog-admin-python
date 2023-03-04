@@ -30,7 +30,8 @@ class SearchableRepositoryInterfaceUnitTest(TestCase):
             SearchableRepositoryInterface()
 
         expected_message = "Can't instantiate abstract class SearchableRepositoryInterface " + \
-            "with abstract methods delete, find_all, find_by_id, insert, search, update"
+            "with abstract methods delete, find_all, find_by_id, insert, search, " + \
+            "sortable_fields, update"
         self.assertEqual(expected_message, error.exception.args[0])
 
 

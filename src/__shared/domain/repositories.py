@@ -43,6 +43,10 @@ class SearchableRepositoryInterface(Generic[GenericEntity,
     def search(self, search_params: GenericSearchableInput) -> GenericSearchableOutput:
         raise NotImplementedError()
 
+    @abstractmethod
+    def sortable_fields(self) -> List[str]:
+        raise NotImplementedError()
+
 
 @dataclass(slots=True, kw_only=True, frozen=True)
 class SearchParams(Generic[SearchFilter]):
