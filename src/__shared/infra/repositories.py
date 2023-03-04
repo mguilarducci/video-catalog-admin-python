@@ -66,7 +66,11 @@ class InMemorySearchableRepository(Generic[GenericEntity, SearchFilter],
                   data: List[GenericEntity],
                   order_by_field: str | None,
                   order_by_direction: str | None) -> List[GenericEntity]:
-        pass
+        if order_by_field not in self.sortable_fields():
+            return data
+
+        reverse = order_by_direction == 'desc'
+        return sorted(data, key=lambda item: getattr(item, order_by_field), reverse=reverse)
 
     def _paginate(self, data: List[GenericEntity], page: int, per_page: int) -> List[GenericEntity]:
         pass

@@ -11,6 +11,7 @@ from __shared.infra.repositories import InMemoryRepository, InMemorySearchableRe
 class EntityStub(Entity):
     name: str
     age: int
+    sortable_int: int
 
 
 class StubInMemoryRepository(InMemoryRepository[EntityStub]):
@@ -23,7 +24,7 @@ class InMemoryRepositoryUnitTest(TestCase):
 
     def setUp(self) -> None:
         self.repo = StubInMemoryRepository()
-        self.item = EntityStub(name='Stub name', age=20)
+        self.item = EntityStub(name='Stub name', age=20, sortable_int=1)
 
     def test_should_init_with_empty_data(self):
         self.assertDictEqual({}, self.repo.data)
@@ -57,7 +58,7 @@ class InMemoryRepositoryUnitTest(TestCase):
         items = self.repo.find_all()
         self.assertEqual([self.item], items)
 
-        new_item = EntityStub(name='new', age=30)
+        new_item = EntityStub(name='new', age=30, sortable_int=1)
         self.repo.insert(new_item)
         items = self.repo.find_all()
         self.assertEqual([self.item, new_item], items)
@@ -65,7 +66,7 @@ class InMemoryRepositoryUnitTest(TestCase):
     def test_update_should_update_an_item(self):
         self.repo.insert(self.item)
         item_updated = EntityStub(
-            unique_entity_id=self.item.id, name='new name', age=50)
+            unique_entity_id=self.item.id, name='new name', age=50, sortable_int=1)
 
         self.repo.update(item_updated)
         self.assertEqual(item_updated, self.repo.data.get(self.item.id))
@@ -91,6 +92,9 @@ class InMemoryRepositoryUnitTest(TestCase):
 
 
 class InMemorySearchableRepositoryStub(InMemorySearchableRepository[EntityStub, str]):
+    def sortable_fields(self) -> List[str]:
+        return ['name', 'sortable_int']
+
     def _filter(self, data: List[EntityStub], filter_param: str | None) -> List[EntityStub]:
         if not filter_param:
             return data
@@ -109,9 +113,9 @@ class InMemorySearchableRepositoryUnitTest(TestCase):
 
     def test__filter_behavior(self):
         # pylint: disable=protected-access
-        data = [EntityStub(name='name value te', age=20),
-                EntityStub(name='Name value', age=30),
-                EntityStub(name='test', age=40),]
+        data = [EntityStub(name='name value te', age=20, sortable_int=1),
+                EntityStub(name='Name value', age=30, sortable_int=1),
+                EntityStub(name='test', age=40, sortable_int=1),]
         result = self.repository._filter(data, None)
         self.assertListEqual(data, result)
 
@@ -130,3 +134,62 @@ class InMemorySearchableRepositoryUnitTest(TestCase):
         result = self.repository._filter(data, '20')
         expected = [data[0]]
         self.assertListEqual(expected, result)
+
+    def test_get_sortable_fields(self):
+        sortable_fields = self.repository.sortable_fields()
+        self.assertListEqual(['name', 'sortable_int'], sortable_fields)
+
+    def test__order_by_behavior(self):
+        # pylint: disable=protected-access
+        data = [EntityStub(name='C', age=3, sortable_int=1),
+                EntityStub(name='A', age=1, sortable_int=3),
+                EntityStub(name='B', age=2, sortable_int=2)]
+
+        ordered_name = [data[1], data[2], data[0]]
+        ordered_sortable_int = [data[0], data[2], data[1]]
+
+        result = self.repository._order_by(data, None, None)
+        self.assertEqual(
+            data, result, 'should not sort when field is None')
+
+        result = self.repository._order_by(data, None, 'asc')
+        self.assertEqual(
+            data, result, 'should not sort when field is None')
+
+        result = self.repository._order_by(data, 'age', None)
+        self.assertEqual(
+            data, result, 'should not sort when field is not in sortable_fields')
+
+        result = self.repository._order_by(data, 'name', None)
+        self.assertEqual(ordered_name, result,
+                         'should sort with asc direction when has direction is None')
+
+        result = self.repository._order_by(data, 'name', 'asc')
+        self.assertEqual(ordered_name, result,
+                         'should sort with asc direction when has direction is `asc`')
+
+        result = self.repository._order_by(data, 'name', 'wtv')
+        self.assertEqual(ordered_name, result,
+                         'should sort with asc direction when has direction is any other string')
+
+        result = self.repository._order_by(data, 'name', 'desc')
+        ordered_name.reverse()
+        self.assertEqual(ordered_name, result,
+                         'should sort with desc direction when has direction is `desc`')
+
+        result = self.repository._order_by(data, 'sortable_int', None)
+        self.assertEqual(ordered_sortable_int, result,
+                         'should sort with asc direction when has direction is None')
+
+        result = self.repository._order_by(data, 'sortable_int', 'asc')
+        self.assertEqual(ordered_sortable_int, result,
+                         'should sort with asc direction when has direction is `asc`')
+
+        result = self.repository._order_by(data, 'sortable_int', 'wtv')
+        self.assertEqual(ordered_sortable_int, result,
+                         'should sort with asc direction when has direction is any other string')
+
+        result = self.repository._order_by(data, 'sortable_int', 'desc')
+        ordered_sortable_int.reverse()
+        self.assertEqual(ordered_sortable_int, result,
+                         'should sort with desc direction when has direction is `desc`')
