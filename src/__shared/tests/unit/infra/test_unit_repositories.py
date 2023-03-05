@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 from unittest import TestCase
 
 from __shared.domain.entities import Entity
@@ -96,7 +96,7 @@ class InMemorySearchableRepositoryStub(InMemorySearchableRepository[EntityStub, 
     def sortable_fields(self) -> List[str]:
         return ['name', 'sortable_int']
 
-    def _filter(self, data: List[EntityStub], filter_param: str | None) -> List[EntityStub]:
+    def _filter(self, data: List[EntityStub], filter_param: Optional[str]) -> List[EntityStub]:
         if not filter_param:
             return data
 

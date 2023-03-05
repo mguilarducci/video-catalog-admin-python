@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, Generic, List
+from typing import Dict, Generic, List, Optional
 
 from __shared.domain.exceptions import NotFoundException
 from __shared.domain.repositories import GenericEntity, RepositoryInterface, \
@@ -59,13 +59,13 @@ class InMemorySearchableRepository(Generic[GenericEntity, SearchFilter],
     @abstractmethod
     def _filter(self,
                 data: List[GenericEntity],
-                filter_param: SearchFilter | None) -> List[GenericEntity]:
+                filter_param: Optional[SearchFilter]) -> List[GenericEntity]:
         raise NotImplementedError()
 
     def _order_by(self,
                   data: List[GenericEntity],
-                  order_by_field: str | None,
-                  order_by_direction: str | None) -> List[GenericEntity]:
+                  order_by_field: Optional[str],
+                  order_by_direction: Optional[str]) -> List[GenericEntity]:
         if order_by_field not in self.sortable_fields():
             return data
 
