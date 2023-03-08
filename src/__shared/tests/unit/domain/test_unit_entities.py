@@ -1,5 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass, is_dataclass
+from typing import Optional
 from unittest import TestCase
 
 from __shared.domain.entities import Entity
@@ -10,6 +11,7 @@ from __shared.domain.value_objects import UniqueEntityId
 class Stub(Entity):
     prop1: str
     prop2: str
+    prop3: Optional[str] = 'default value' # NOSONAR
 
 
 class EntityUnitTest(TestCase):
@@ -41,7 +43,8 @@ class EntityUnitTest(TestCase):
         expected_dict = {
             'id': '2d01459a-f739-48d0-a36b-e1cb2a8c72f0',
             'prop1': 'prop1',
-            'prop2': 'prop2'
+            'prop2': 'prop2',
+            'prop3': 'default value'
         }
 
         entity = Stub(
@@ -51,5 +54,18 @@ class EntityUnitTest(TestCase):
 
     def test_set_method(self):
         entity = Stub(prop1='prop1', prop2='prop2')
-        entity._set('prop1', 'new value') # pylint: disable=protected-access
+        entity._set('prop1', 'new value')  # pylint: disable=protected-access
         self.assertEqual('new value', entity.prop1)
+
+    def test_get_default(self):
+        result = Stub.get_default('prop1')
+        self.assertIsNone(
+            result, 'should return None when the field is required')
+
+        result = Stub.get_default('invalid_field')
+        self.assertIsNone(
+            result, 'should return None when the field is invalid')
+
+        result = Stub.get_default('prop3')
+        self.assertEqual('default value', result,
+                         'should return the default value')

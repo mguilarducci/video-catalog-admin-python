@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, _MISSING_TYPE
 from typing import Any, Dict
 
 from __shared.domain.value_objects import UniqueEntityId
@@ -21,5 +21,15 @@ class Entity(ABC):
         entity_dict['id'] = self.id
         return entity_dict
 
-    def _set(self, field_name: str, value: Any):
+    @classmethod
+    def get_default(cls, field_name: str) -> Any:
+        # pylint: disable=no-member
+        class_field = cls.__dataclass_fields__.get(field_name)
+
+        if field is None:
+            return None
+
+        return None if isinstance(class_field.default, _MISSING_TYPE) else class_field.default
+
+    def _set(self, field_name: str, value: Any) -> None:
         object.__setattr__(self, field_name, value)
